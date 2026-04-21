@@ -1,0 +1,68 @@
+[
+  {
+    "transactionDate": "03/15/2026",
+    "transactionBarcode": "4900012345678901234",
+    "warehouseName": "SEATTLE #1",
+    "total": "187.43",
+    "itemArray": [
+      { "itemNumber": "1234567", "itemDescription01": "KS ORGANIC EGGS 2DZ", "amount": "7.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "2345678", "itemDescription01": "KS OLIVE OIL EV 2L", "amount": "14.49", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "3456789", "itemDescription01": "FRESH SALMON FILLET", "itemDescription02": "WILD CAUGHT SOCKEYE", "amount": "24.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "4567890", "itemDescription01": "KS PAPER TOWELS 12PK", "amount": "18.99", "quantity": 1, "taxFlag": "T" },
+      { "itemNumber": "5678901", "itemDescription01": "ORGANIC BANANAS 3LB", "amount": "2.49", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "6789012", "itemDescription01": "KS ROTISSERIE CHKN", "amount": "4.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "7890123", "itemDescription01": "AVOCADOS 6CT BAG", "amount": "6.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "8901234", "itemDescription01": "KS ALMOND BUTTER 26OZ", "amount": "9.49", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "9012345", "itemDescription01": "CHARMIN ULTRA SOFT 30R", "amount": "28.99", "quantity": 1, "taxFlag": "T" },
+      { "itemNumber": "1122334", "itemDescription01": "KS WATER 40PK .5L", "amount": "4.29", "quantity": 2, "taxFlag": "N" },
+      { "itemNumber": "2233445", "itemDescription01": "ORGANIC BLUEBERRIES 18OZ", "amount": "8.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "3344556", "itemDescription01": "KS PARM REGGIANO WEDGE", "amount": "18.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "4455667", "itemDescription01": "TIDE PODS 112CT", "amount": "27.49", "quantity": 1, "taxFlag": "T" }
+    ],
+    "subTaxes": { "stateTax": "7.27" },
+    "couponArray": [],
+    "tenderArray": [{ "tenderDescription": "VISA ****1234", "amount": "187.43" }]
+  },
+  {
+    "transactionDate": "03/22/2026",
+    "transactionBarcode": "4900012345678901235",
+    "warehouseName": "SEATTLE #1",
+    "total": "142.18",
+    "itemArray": [
+      { "itemNumber": "1234567", "itemDescription01": "KS ORGANIC EGGS 2DZ", "amount": "7.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "9988776", "itemDescription01": "KS CHICKEN BREAST 6.5LB", "amount": "22.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "8877665", "itemDescription01": "ORGANIC SPINACH 1LB", "amount": "4.49", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "7766554", "itemDescription01": "KS MIXED NUTS 2.5LB", "amount": "15.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "6655443", "itemDescription01": "BOUNTY ADV SELECT 12R", "amount": "22.49", "quantity": 1, "taxFlag": "T" },
+      { "itemNumber": "5544332", "itemDescription01": "KS GREEK YOGURT 3PK", "amount": "8.49", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "4433221", "itemDescription01": "STRAWBERRIES 2LB", "amount": "5.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "3322110", "itemDescription01": "KS LAUNDRY DET 194OZ", "amount": "19.99", "quantity": 1, "taxFlag": "T" },
+      { "itemNumber": "2211009", "itemDescription01": "WHOLE MILK 1GAL 2PK", "amount": "7.29", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "1100998", "itemDescription01": "KS BATH TISSUE 30R", "amount": "22.99", "quantity": 1, "taxFlag": "T" }
+    ],
+    "subTaxes": { "stateTax": "3.48" },
+    "couponArray": [
+      { "itemNumber": "6655443", "itemDescription01": "BOUNTY COUPON", "amount": "-3.00" }
+    ],
+    "tenderArray": [{ "tenderDescription": "VISA ****1234", "amount": "142.18" }]
+  },
+  {
+    "transactionDate": "02/10/2026",
+    "transactionBarcode": "4900012345678901236",
+    "warehouseName": "BELLEVUE #2",
+    "total": "95.67",
+    "itemArray": [
+      { "itemNumber": "1234567", "itemDescription01": "KS ORGANIC EGGS 2DZ", "amount": "7.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "5566778", "itemDescription01": "KS BACON 4PK", "amount": "16.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "6677889", "itemDescription01": "ORGANIC BROCCOLI 4CT", "amount": "5.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "7788990", "itemDescription01": "KS MOZZARELLA 2LB", "amount": "9.49", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "8899001", "itemDescription01": "CLOROX WIPES 5PK", "amount": "16.49", "quantity": 1, "taxFlag": "T" },
+      { "itemNumber": "9900112", "itemDescription01": "KS ORANGE JUICE 2PK", "amount": "9.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "0011223", "itemDescription01": "ORGANIC APPLES 5LB", "amount": "8.99", "quantity": 1, "taxFlag": "N" },
+      { "itemNumber": "1122335", "itemDescription01": "KS COFFEE BEANS 3LB", "amount": "17.99", "quantity": 1, "taxFlag": "N" }
+    ],
+    "subTaxes": { "stateTax": "1.75" },
+    "couponArray": [],
+    "tenderArray": [{ "tenderDescription": "AMEX ****5678", "amount": "95.67" }]
+  }
+]
