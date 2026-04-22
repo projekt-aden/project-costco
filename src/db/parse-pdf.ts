@@ -1,10 +1,4 @@
-import * as pdfjsLib from 'pdfjs-dist'
 import type { Receipt, ReceiptItem } from '../types/receipt'
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString()
 
 let counter = 0
 function makeId(): string {
@@ -13,6 +7,12 @@ function makeId(): string {
 }
 
 async function extractLines(file: ArrayBuffer): Promise<string[]> {
+  const pdfjsLib = await import('pdfjs-dist')
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString()
+
   const pdf = await pdfjsLib.getDocument({ data: file }).promise
   const allLines: string[] = []
 

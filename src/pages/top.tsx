@@ -34,18 +34,15 @@ export function TopPage() {
   const categories = useMemo((): TopCategory[] => {
     if (products.length === 0) return []
 
-    // Separate returns (negative amount) from regular purchases
     const nonFuel = products.filter((p) => !p.totalGallons)
     const regular = nonFuel.filter((p) => p.totalSpent >= 0)
     const returns = nonFuel.filter((p) => p.totalSpent < 0)
 
-    // Most purchased
     const mostPurchased = [...regular]
       .sort((a, b) => b.purchaseCount - a.purchaseCount)
       .slice(0, 10)
       .map((p) => ({ product: p, value: p.purchaseCount }))
 
-    // Most expensive (highest avg unit price)
     const mostExpensive = [...regular]
       .filter((p) => p.prices.some((x) => x.unitPrice > 0))
       .sort((a, b) => {
@@ -60,13 +57,11 @@ export function TopPage() {
         return { product: p, value: pos.reduce((s, x) => s + x.unitPrice, 0) / pos.length }
       })
 
-    // Biggest spenders (total $ spent on item)
     const biggestSpenders = [...regular]
       .sort((a, b) => b.totalSpent - a.totalSpent)
       .slice(0, 10)
       .map((p) => ({ product: p, value: p.totalSpent }))
 
-    // Most consistent (bought most months — loyal picks)
     const loyal = [...regular]
       .map((p) => {
         const months = new Set(p.purchases.map((x) => x.date.slice(0, 7)))
@@ -75,7 +70,6 @@ export function TopPage() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10)
 
-    // Biggest price jumps (highest single price increase %)
     const priceJumps = [...regular]
       .filter((p) => p.prices.filter((x) => x.unitPrice > 0).length >= 2)
       .map((p) => {
@@ -89,7 +83,6 @@ export function TopPage() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10)
 
-    // Returns (negative totals)
     const topReturns = [...returns]
       .sort((a, b) => a.totalSpent - b.totalSpent)
       .slice(0, 10)
@@ -103,7 +96,7 @@ export function TopPage() {
         color: 'text-costco-red',
         bg: 'bg-red-50',
         items: mostPurchased,
-        valueLabel: (i: TopItem) => `${i.value}x`,
+        valueLabel: (item: TopItem) => `${item.value}x`,
       },
       {
         id: 'biggest-spenders',
@@ -112,8 +105,8 @@ export function TopPage() {
         color: 'text-amber-600',
         bg: 'bg-amber-50',
         items: biggestSpenders,
-        valueLabel: (i: TopItem) => fmt(i.value),
-        subLabel: (i: TopItem) => `${i.product.purchaseCount}x bought`,
+        valueLabel: (item: TopItem) => fmt(item.value),
+        subLabel: (item: TopItem) => `${item.product.purchaseCount}x bought`,
       },
       {
         id: 'most-expensive',
@@ -122,7 +115,7 @@ export function TopPage() {
         color: 'text-violet-600',
         bg: 'bg-violet-50',
         items: mostExpensive,
-        valueLabel: (i: TopItem) => fmt(i.value),
+        valueLabel: (item: TopItem) => fmt(item.value),
         subLabel: () => 'avg unit price',
       },
       {
@@ -132,8 +125,8 @@ export function TopPage() {
         color: 'text-costco-blue',
         bg: 'bg-blue-50',
         items: loyal,
-        valueLabel: (i: TopItem) => `${i.value} months`,
-        subLabel: (i: TopItem) => `${i.product.purchaseCount}x total`,
+        valueLabel: (item: TopItem) => `${item.value} months`,
+        subLabel: (item: TopItem) => `${item.product.purchaseCount}x total`,
       },
       {
         id: 'price-jumps',
@@ -142,9 +135,9 @@ export function TopPage() {
         color: 'text-rose-600',
         bg: 'bg-rose-50',
         items: priceJumps,
-        valueLabel: (i: TopItem) => `+${i.value}%`,
-        subLabel: (i: TopItem) => {
-          const pos = i.product.prices.filter((x: ProductAggregate['prices'][number]) => x.unitPrice > 0)
+        valueLabel: (item: TopItem) => `+${item.value}%`,
+        subLabel: (item: TopItem) => {
+          const pos = item.product.prices.filter((price) => price.unitPrice > 0)
           return `${fmt(pos[0].unitPrice)} → ${fmt(pos[pos.length - 1].unitPrice)}`
         },
       },
@@ -155,8 +148,8 @@ export function TopPage() {
         color: 'text-orange-600',
         bg: 'bg-orange-50',
         items: topReturns,
-        valueLabel: (i: TopItem) => `-${fmt(i.value)}`,
-        subLabel: (i: TopItem) => `${i.product.purchaseCount}x returned`,
+        valueLabel: (item: TopItem) => `-${fmt(item.value)}`,
+        subLabel: (item: TopItem) => `${item.product.purchaseCount}x returned`,
       },
     ].filter((c) => c.items.length > 0)
   }, [products])
@@ -178,7 +171,6 @@ export function TopPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {categories.map((cat) => (
             <div key={cat.id} className="bg-surface rounded-xl border overflow-hidden">
-              {/* Category header */}
               <div className="p-4 border-b flex items-center gap-2.5">
                 <div className={`w-8 h-8 ${cat.bg} ${cat.color} rounded-lg flex items-center justify-center`}>
                   {cat.icon}
@@ -186,7 +178,6 @@ export function TopPage() {
                 <h3 className="font-semibold">{cat.title}</h3>
               </div>
 
-              {/* Items */}
               <div>
                 {cat.items.map((item, rank) => (
                   <button
@@ -194,7 +185,6 @@ export function TopPage() {
                     onClick={() => navigate(`/analysis/${item.product.itemNumber}`)}
                     className="w-full flex items-center gap-3 p-3 hover:bg-surface-3 transition-colors cursor-pointer border-b last:border-b-0"
                   >
-                    {/* Rank */}
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                       rank === 0 ? `${cat.bg} ${cat.color}` :
                       rank < 3 ? 'bg-surface-3 text-text' :
@@ -203,7 +193,6 @@ export function TopPage() {
                       {rank + 1}
                     </div>
 
-                    {/* Name */}
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-sm font-medium truncate">{item.product.description}</p>
                       {cat.subLabel && (
@@ -211,7 +200,6 @@ export function TopPage() {
                       )}
                     </div>
 
-                    {/* Value */}
                     <span className={`text-sm font-bold tabular-nums shrink-0 ${rank < 3 ? cat.color : 'text-text'}`}>
                       {cat.valueLabel(item)}
                     </span>

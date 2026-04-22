@@ -1,9 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useSyncExternalStore } from 'react'
 import { db } from '../db'
-import type { Receipt, YearGroup, MonthGroup, DayGroup } from '../types/receipt'
 import { parseReceiptsFromJson } from '../db/parse'
-import { parseReceiptsFromPdf } from '../db/parse-pdf'
+import type { Receipt, YearGroup, MonthGroup, DayGroup } from '../types/receipt'
 
 const DEMO_MODE_KEY = 'costco-demo-mode'
 const demoModeListeners = new Set<() => void>()
@@ -153,6 +152,7 @@ export async function importReceiptsFromJson(jsonString: string): Promise<number
 
 export async function importReceiptsFromPdf(buffer: ArrayBuffer): Promise<number> {
   await resetForRealImportIfNeeded()
+  const { parseReceiptsFromPdf } = await import('../db/parse-pdf')
   const receipts = await parseReceiptsFromPdf(buffer)
   return addReceipts(receipts)
 }

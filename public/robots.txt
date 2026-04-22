@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /receipts
+Disallow: /profile
+Disallow: /transfer/
+
+Sitemap: https://projekt-aden.github.io/project-costco/sitemap.xml

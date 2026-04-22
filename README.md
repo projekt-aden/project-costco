@@ -1,5 +1,7 @@
 # Costco Tracker
 
+Track Costco receipts, analyze spending, compare product prices, and review gas fill-ups in a local-first web app.
+
 A privacy-first receipt tracker for Costco members. All data stays on your device — no accounts, no servers, no tracking.
 
 Import your Costco receipts (JSON or PDF), and get instant insights into your spending: product history, price trends, year-over-year comparisons, and more.
@@ -52,6 +54,33 @@ npm test
 npm run build
 ```
 
+## SEO and Static Build
+
+SEO metadata is route-based for public pages, and the production build pre-renders these routes into static HTML:
+
+- `/`
+- `/analysis`
+- `/gas`
+- `/trends`
+- `/top`
+- `/scan`
+
+Private routes such as receipts and profile remain client-side and are marked `noindex`.
+
+Before building for production, set the public site URL so canonical tags, `robots.txt`, and `sitemap.xml` point at the right domain:
+
+```bash
+VITE_SITE_URL=https://your-domain.example npm run build
+```
+
+For GitHub Pages repository deployments:
+
+```bash
+VITE_BASE_PATH=/project-costco/ VITE_SITE_URL=https://projekt-aden.github.io/project-costco npm run build
+```
+
+The build also generates `dist/404.html` as a fallback for GitHub Pages route refreshes.
+
 ## Importing Receipts
 
 ### Bulk export (recommended)
@@ -75,7 +104,7 @@ You can also export individual receipts as JSON from the DevTools Network tab (f
 
 ## Project Structure
 
-```
+```text
 src/
   components/     UI components organized by feature
     analysis/     Product cards, price charts
@@ -95,8 +124,8 @@ src/
 ## Tests
 
 ```bash
-npm test          # run once
-npm run test:watch  # watch mode
+npm test
+npm run test:watch
 ```
 
 42 tests across 4 suites covering receipt parsing, category matching, trend calculations, and date utilities.

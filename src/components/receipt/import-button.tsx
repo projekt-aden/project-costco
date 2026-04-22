@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { useRef, useState, useEffect, useSyncExternalStore } from 'react'
 import { Upload, FileUp, Check, AlertCircle, Copy, X, Loader2 } from 'lucide-react'
 import { importReceiptsFromJson, importReceiptsFromPdf } from '../../hooks/use-receipts'
@@ -46,7 +48,7 @@ function subscribeToast(cb: () => void) {
 }
 
 function useToast() {
-  return useSyncExternalStore(subscribeToast, getToast)
+  return useSyncExternalStore(subscribeToast, getToast, () => null)
 }
 
 // ─── Processing ───

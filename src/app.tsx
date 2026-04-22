@@ -1,16 +1,36 @@
-import { useEffect, useRef } from 'react'
+import { Suspense, lazy, useEffect, useRef } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Shell } from './components/layout/shell'
 import { DashboardPage } from './pages/dashboard'
-import { ReceiptsPage } from './pages/receipts'
-import { ReceiptDetailPage } from './pages/receipt-detail'
 import { AnalysisPage } from './pages/analysis'
-import { ProductDetailPage } from './pages/product-detail'
 import { GasPage } from './pages/gas'
 import { TrendsPage } from './pages/trends'
 import { TopPage } from './pages/top'
-import { ScanPage } from './pages/scan'
-import { ProfilePage } from './pages/profile'
+
+const ReceiptsPage = lazy(async () => {
+  const module = await import('./pages/receipts')
+  return { default: module.ReceiptsPage }
+})
+
+const ReceiptDetailPage = lazy(async () => {
+  const module = await import('./pages/receipt-detail')
+  return { default: module.ReceiptDetailPage }
+})
+
+const ProductDetailPage = lazy(async () => {
+  const module = await import('./pages/product-detail')
+  return { default: module.ProductDetailPage }
+})
+
+const ScanPage = lazy(async () => {
+  const module = await import('./pages/scan')
+  return { default: module.ScanPage }
+})
+
+const ProfilePage = lazy(async () => {
+  const module = await import('./pages/profile')
+  return { default: module.ProfilePage }
+})
 
 const GOATCOUNTER_ENDPOINT = 'https://projectaden.goatcounter.com/count'
 const GOATCOUNTER_SCRIPT_ID = 'goatcounter-script'
@@ -75,19 +95,32 @@ export function App() {
   return (
     <Shell>
       <GoatCounterAnalytics />
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/receipts" element={<ReceiptsPage />} />
-        <Route path="/receipts/:id" element={<ReceiptDetailPage />} />
-        <Route path="/analysis" element={<AnalysisPage />} />
-        <Route path="/analysis/:itemNumber" element={<ProductDetailPage />} />
-        <Route path="/gas" element={<GasPage />} />
-        <Route path="/trends" element={<TrendsPage />} />
-        <Route path="/top" element={<TopPage />} />
-        <Route path="/scan" element={<ScanPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/receipts" element={<ReceiptsPage />} />
+          <Route path="/receipts/:id" element={<ReceiptDetailPage />} />
+          <Route path="/analysis" element={<AnalysisPage />} />
+          <Route path="/analysis/:itemNumber" element={<ProductDetailPage />} />
+          <Route path="/gas" element={<GasPage />} />
+          <Route path="/trends" element={<TrendsPage />} />
+          <Route path="/top" element={<TopPage />} />
+          <Route path="/scan" element={<ScanPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </Shell>
+  )
+}
+
+function RouteFallback() {
+  return (
+    <div className="min-h-[40vh] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3 text-text-3">
+        <div className="w-8 h-8 border-2 border-border border-t-costco-red rounded-full animate-spin" />
+        <p className="text-sm">Loading page...</p>
+      </div>
+    </div>
   )
 }
