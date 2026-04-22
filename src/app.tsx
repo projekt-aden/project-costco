@@ -12,8 +12,9 @@ import { TopPage } from './pages/top'
 import { ScanPage } from './pages/scan'
 import { ProfilePage } from './pages/profile'
 
-const GOATCOUNTER_ENDPOINT = 'https://projectaden.goatcounter.com/count'
+const GOATCOUNTER_ENDPOINT = import.meta.env.VITE_GOATCOUNTER_ENDPOINT
 const GOATCOUNTER_SCRIPT_ID = 'goatcounter-script'
+const GOATCOUNTER_ENABLED = import.meta.env.PROD && import.meta.env.VITE_ENABLE_GOATCOUNTER === 'true'
 
 type GoatCounterApi = {
   count?: (vars?: { path?: string; title?: string }) => void
@@ -30,7 +31,7 @@ function GoatCounterAnalytics() {
   const lastTrackedPath = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!import.meta.env.PROD) {
+    if (!GOATCOUNTER_ENABLED || !GOATCOUNTER_ENDPOINT) {
       return
     }
 
