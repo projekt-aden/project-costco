@@ -158,7 +158,7 @@ export async function importReceiptsFromPdf(buffer: ArrayBuffer): Promise<number
 }
 
 export async function loadDemoReceipts(): Promise<number> {
-  const res = await fetch('/costco-receipts-demo.json', { cache: 'no-store' })
+  const res = await fetch(`${import.meta.env.BASE_URL}costco-receipts-demo.json`, { cache: 'no-store' })
   if (!res.ok) throw new Error('Could not load demo data')
 
   const jsonString = await res.text()
