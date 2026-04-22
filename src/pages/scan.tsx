@@ -19,37 +19,38 @@ import { clearAllData, useDemoMode } from '../hooks/use-receipts'
 
 const SCRIPT_URL = 'https://github.com/projekt-aden/project-costco/blob/main/public/costco-export.js'
 type ImportMethod = 'pdf' | 'json' | null
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`
 
 const PDF_GUIDE_STEPS = [
   {
     number: '01',
     title: 'Sign in to Costco',
     description: 'Open your Costco account in a browser and sign in before opening receipt history.',
-    image: '/import-guides/pdf-receipt-download/steps/01-sign-in.png',
+    image: assetUrl('import-guides/pdf-receipt-download/steps/01-sign-in.png'),
   },
   {
     number: '02',
     title: 'Open Orders & Purchases',
     description: 'Go to your account history and open the section where Costco shows past warehouse receipts.',
-    image: '/import-guides/pdf-receipt-download/steps/02-open-orders-or-receipts.png',
+    image: assetUrl('import-guides/pdf-receipt-download/steps/02-open-orders-or-receipts.png'),
   },
   {
     number: '04',
     title: 'Open Print or Download',
     description: 'Open the receipt you want to save, then use Costco’s print or download action for that receipt.',
-    image: '/import-guides/pdf-receipt-download/steps/04-find-print-or-download.png',
+    image: assetUrl('import-guides/pdf-receipt-download/steps/04-find-print-or-download.png'),
   },
   {
     number: '05',
     title: 'Save as PDF',
     description: 'In the browser print dialog choose Save as PDF and keep the default full receipt layout.',
-    image: '/import-guides/pdf-receipt-download/steps/05-save-as-pdf.png',
+    image: assetUrl('import-guides/pdf-receipt-download/steps/05-save-as-pdf.png'),
   },
   {
     number: '06',
     title: 'Import PDF into the app',
     description: 'Drop one or more saved PDF receipts into the importer below. You can import them in batches.',
-    image: '/import-guides/pdf-receipt-download/steps/06-import-into-app.png',
+    image: assetUrl('import-guides/pdf-receipt-download/steps/06-import-into-app.png'),
   },
 ] as const
 
