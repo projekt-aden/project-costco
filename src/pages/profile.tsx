@@ -6,7 +6,7 @@ import {
   FileDown, BarChart3, ExternalLink, Info,
 } from 'lucide-react'
 import { db } from '../db'
-import { useReceipts } from '../hooks/use-receipts'
+import { clearAllData, useReceipts } from '../hooks/use-receipts'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 export function ProfilePage() {
@@ -87,9 +87,7 @@ export function ProfilePage() {
   async function handleDeleteAll() {
     setStatus({ text: 'Deleting...', type: 'loading' })
     try {
-      await db.receipts.clear()
-      await db.productCache.clear()
-      localStorage.removeItem('costco-year-filter')
+      await clearAllData()
       setConfirmDelete(false)
       setStatus({ text: 'All data deleted', type: 'success' })
     } catch (err) {
