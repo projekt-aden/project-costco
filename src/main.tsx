@@ -1,13 +1,21 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { HashRouter } from 'react-router-dom'
+import { createRoot, hydrateRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import { App } from './app'
 import './styles.css'
+import { getBasePath } from './seo/site'
 
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!
+const app = (
   <StrictMode>
-    <HashRouter>
+    <BrowserRouter basename={getBasePath()}>
       <App />
-    </HashRouter>
-  </StrictMode>,
+    </BrowserRouter>
+  </StrictMode>
 )
+
+if (container.hasChildNodes()) {
+  hydrateRoot(container, app)
+} else {
+  createRoot(container).render(app)
+}

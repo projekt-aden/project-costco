@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Receipt, BarChart3, Fuel, TrendingUp,
   Trophy, Download, UserCircle,
 } from 'lucide-react'
+import { RouteSeo } from '../seo/route-seo'
 
 const tabs = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -18,6 +19,7 @@ const tabs = [
 export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col pb-14 md:pb-0">
+      <RouteSeo />
       {/* ─── Header ─── */}
       <header className="bg-costco-red text-white">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">

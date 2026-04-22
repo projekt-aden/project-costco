@@ -18,7 +18,6 @@ export function ProductCard({ product }: { product: ProductAggregate }) {
       className="bg-surface rounded-xl border hover:border-costco-red/30 hover:shadow-md transition-all cursor-pointer text-left overflow-hidden group"
     >
       <div className="p-3 space-y-2">
-        {/* Icon + description */}
         <div className="flex items-start gap-2.5">
           <div className={`w-9 h-9 ${cat.bg} ${cat.color} rounded-lg flex items-center justify-center shrink-0`}>
             <Icon size={18} />
@@ -31,7 +30,6 @@ export function ProductCard({ product }: { product: ProductAggregate }) {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 text-xs text-text-2">
             <ShoppingCart size={12} />

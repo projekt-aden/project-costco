@@ -1,5 +1,42 @@
 import type { Receipt, ReceiptItem, ReceiptCoupon } from '../types/receipt'
 
+type RawReceiptItem = {
+  fuelGradeCode?: string | null
+  fuelUnitQuantity?: string | number | null
+  itemUnitPriceAmount?: string | number | null
+  amount?: string | number | null
+  itemNumber?: string
+  itemDescription01?: string
+  itemDescription02?: string
+  fuelGradeDescription?: string | null
+  unit?: string | number | null
+  quantity?: string | number | null
+  taxFlag?: string | null
+}
+
+type RawReceiptCoupon = {
+  itemNumber?: string
+  itemDescription01?: string
+  amount?: string | number | null
+}
+
+type RawReceipt = {
+  itemArray?: RawReceiptItem[]
+  couponArray?: RawReceiptCoupon[]
+  receiptType?: string
+  documentType?: string
+  total?: string | number | null
+  taxes?: string | number | null
+  subTaxes?: Record<string, string | number | null | undefined> | null
+  subTotal?: string | number | null
+  transactionDate?: string
+  transactionDateTime?: string
+  warehouseCity?: string
+  warehouseState?: string
+  warehouseName?: string
+  transactionBarcode?: string
+}
+
 function toNumber(val: string | number | undefined | null): number {
   if (val === undefined || val === null) return 0
   const n = typeof val === 'string' ? parseFloat(val.replace(/[^0-9.-]/g, '')) : val
@@ -7,11 +44,9 @@ function toNumber(val: string | number | undefined | null): number {
 }
 
 function parseDate(raw: string): string {
-  // Already ISO (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
   if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
     return raw.slice(0, 10)
   }
-  // Costco MM/DD/YYYY
   const parts = raw.split('/')
   if (parts.length === 3) {
     const [m, d, y] = parts
@@ -29,15 +64,12 @@ function makeId(): string {
   return `${Date.now()}-${counter}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function parseReceipt(raw: any): Receipt {
-  const itemArray: any[] = raw.itemArray || []
-
-  // Detect receipt type
+export function parseReceipt(raw: RawReceipt): Receipt {
+  const itemArray = raw.itemArray || []
   const typeStr = ((raw.receiptType || '') + ' ' + (raw.documentType || '')).toLowerCase()
   const isFuel = typeStr.includes('fuel') || typeStr.includes('gas')
 
-  const items: ReceiptItem[] = itemArray.map((item: any) => {
+  const items: ReceiptItem[] = itemArray.map((item) => {
     const hasFuel = isFuel && !!item.fuelGradeCode && toNumber(item.fuelUnitQuantity) > 0
     const gallons = hasFuel ? toNumber(item.fuelUnitQuantity) : undefined
     const ppg = hasFuel ? toNumber(item.itemUnitPriceAmount) : undefined
@@ -57,25 +89,20 @@ export function parseReceipt(raw: any): Receipt {
     }
   })
 
-  const coupons: ReceiptCoupon[] = (raw.couponArray || []).map((c: any) => ({
+  const coupons: ReceiptCoupon[] = (raw.couponArray || []).map((c) => ({
     itemNumber: c.itemNumber,
     description: c.itemDescription01,
     amount: toNumber(c.amount),
   }))
 
   const total = toNumber(raw.total)
-
-  // Tax: prefer direct taxes field, fallback to subTaxes sum
   let tax = toNumber(raw.taxes)
   if (!tax && raw.subTaxes && typeof raw.subTaxes === 'object') {
     tax = Object.values(raw.subTaxes as Record<string, string | number | null | undefined>)
       .reduce((sum: number, v) => sum + toNumber(v), 0)
   }
-
-  // Subtotal: prefer direct field, fallback to total - tax
   const subtotal = raw.subTotal ? toNumber(raw.subTotal) : total - tax
 
-  // Warehouse: include city/state if available
   const dateStr = raw.transactionDate || raw.transactionDateTime || ''
   const warehouse = raw.warehouseCity
     ? `${raw.warehouseName || ''} — ${raw.warehouseCity}, ${raw.warehouseState || ''}`
@@ -98,10 +125,10 @@ export function parseReceipt(raw: any): Receipt {
 
 export function parseReceiptsFromJson(json: unknown): Receipt[] {
   if (Array.isArray(json)) {
-    return json.map(parseReceipt)
+    return json.map((entry) => parseReceipt(entry as RawReceipt))
   }
   if (typeof json === 'object' && json !== null) {
-    return [parseReceipt(json)]
+    return [parseReceipt(json as RawReceipt)]
   }
   throw new Error('Invalid receipt format: expected JSON object or array')
 }

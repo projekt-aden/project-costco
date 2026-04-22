@@ -8,6 +8,7 @@ const STORAGE_KEY = 'costco-year-filter'
 const listeners = new Set<() => void>()
 
 function getSnapshot(): string | null {
+  if (typeof localStorage === 'undefined') return null
   return localStorage.getItem(STORAGE_KEY)
 }
 
@@ -17,6 +18,7 @@ function subscribe(cb: () => void) {
 }
 
 export function setYearFilter(year: number | null) {
+  if (typeof localStorage === 'undefined') return
   if (year === null) {
     localStorage.removeItem(STORAGE_KEY)
   } else {
@@ -26,7 +28,7 @@ export function setYearFilter(year: number | null) {
 }
 
 export function useYearFilter() {
-  const raw = useSyncExternalStore(subscribe, getSnapshot)
+  const raw = useSyncExternalStore(subscribe, getSnapshot, () => null)
   const selectedYear = raw ? parseInt(raw) : null
   return { selectedYear, setYear: setYearFilter }
 }
