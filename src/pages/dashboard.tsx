@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { SummaryCards } from '../components/dashboard/summary-cards'
 import { ImportButton, DropZone } from '../components/receipt/import-button'
-import { useReceipts } from '../hooks/use-receipts'
+import { DemoModeBanner, EmptyDemoOnboarding } from '../components/receipt/demo-mode-banner'
+import { clearAllData, loadDemoReceipts, useDemoMode, useReceipts } from '../hooks/use-receipts'
 import { useFilteredReceipts } from '../hooks/use-year-filter'
 import { YearPicker } from '../components/ui/year-picker'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, MapPin, Hash } from 'lucide-react'
+import { AlertTriangle, ChevronDown, Hash, Loader2, MapPin } from 'lucide-react'
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
@@ -18,9 +19,41 @@ export function DashboardPage() {
   const receipts = useFilteredReceipts()
   const navigate = useNavigate()
   const [showAll, setShowAll] = useState(false)
+  const [demoBusy, setDemoBusy] = useState(false)
+  const [demoStatus, setDemoStatus] = useState<string | null>(null)
+  const [demoError, setDemoError] = useState<string | null>(null)
+  const demoMode = useDemoMode()
 
   const visible = showAll ? receipts : receipts.slice(0, PAGE_SIZE)
   const hasMore = receipts.length > PAGE_SIZE
+
+  async function handleTryDemo() {
+    setDemoBusy(true)
+    setDemoError(null)
+    setDemoStatus('Loading demo receipts...')
+    try {
+      await loadDemoReceipts()
+      setDemoStatus(null)
+    } catch (err) {
+      setDemoError(err instanceof Error ? err.message : 'Could not load demo data')
+      setDemoStatus(null)
+    } finally {
+      setDemoBusy(false)
+    }
+  }
+
+  async function handleStartFresh() {
+    setDemoBusy(true)
+    setDemoError(null)
+    setDemoStatus('Removing demo data...')
+    try {
+      await clearAllData()
+      setDemoStatus(null)
+      navigate('/scan')
+    } finally {
+      setDemoBusy(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -32,10 +65,32 @@ export function DashboardPage() {
         </div>
       </div>
 
+      {demoStatus && (
+        <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-3 text-sm text-costco-blue">
+          <Loader2 size={16} className="animate-spin" />
+          {demoStatus}
+        </div>
+      )}
+
+      {demoError && (
+        <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">
+          <AlertTriangle size={16} />
+          {demoError}
+        </div>
+      )}
+
       {allReceipts.length === 0 ? (
-        <DropZone />
+        <>
+          <EmptyDemoOnboarding
+            onTryDemo={handleTryDemo}
+            onImportOwn={() => navigate('/scan')}
+            busy={demoBusy}
+          />
+          <DropZone />
+        </>
       ) : (
         <>
+          {demoMode && <DemoModeBanner onStartFresh={handleStartFresh} busy={demoBusy} />}
           <SummaryCards />
 
           <div className="bg-surface rounded-xl border">

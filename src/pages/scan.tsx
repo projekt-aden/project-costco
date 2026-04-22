@@ -12,7 +12,10 @@ import {
   Terminal,
   Upload,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { DemoModeBanner } from '../components/receipt/demo-mode-banner'
 import { startImport } from '../components/receipt/import-button'
+import { clearAllData, useDemoMode } from '../hooks/use-receipts'
 
 const SCRIPT_URL = 'https://github.com/projekt-aden/project-costco/blob/main/public/costco-export.js'
 type ImportMethod = 'pdf' | 'json' | null
@@ -179,11 +182,25 @@ const DELAY_MS = 1000;
 export function ScanPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [selectedMethod, setSelectedMethod] = useState<ImportMethod>(null)
+  const [demoBusy, setDemoBusy] = useState(false)
+  const demoMode = useDemoMode()
+  const navigate = useNavigate()
 
   const handleFiles = useCallback((files: FileList | File[]) => {
     if (files.length > 0) startImport(files)
     if (inputRef.current) inputRef.current.value = ''
   }, [])
+
+  async function handleStartFresh() {
+    setDemoBusy(true)
+    try {
+      await clearAllData()
+      setSelectedMethod(null)
+      navigate('/scan')
+    } finally {
+      setDemoBusy(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -191,6 +208,8 @@ export function ScanPage() {
         <h2 className="text-xl font-bold">Import</h2>
         <p className="text-sm text-text-2 max-w-3xl">Choose how you want to bring Costco receipts into the app.</p>
       </div>
+
+      {demoMode && <DemoModeBanner onStartFresh={handleStartFresh} busy={demoBusy} />}
 
       {selectedMethod === null ? (
         <MethodSelectionScreen onSelect={setSelectedMethod} />

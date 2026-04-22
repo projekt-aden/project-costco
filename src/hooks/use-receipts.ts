@@ -1,8 +1,31 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useSyncExternalStore } from 'react'
 import { db } from '../db'
 import type { Receipt, YearGroup, MonthGroup, DayGroup } from '../types/receipt'
 import { parseReceiptsFromJson } from '../db/parse'
 import { parseReceiptsFromPdf } from '../db/parse-pdf'
+
+const DEMO_MODE_KEY = 'costco-demo-mode'
+const demoModeListeners = new Set<() => void>()
+
+function emitDemoModeChange() {
+  demoModeListeners.forEach((listener) => listener())
+}
+
+function getDemoModeSnapshot() {
+  return localStorage.getItem(DEMO_MODE_KEY) === 'true'
+}
+
+function subscribeDemoMode(listener: () => void) {
+  demoModeListeners.add(listener)
+  return () => demoModeListeners.delete(listener)
+}
+
+function setDemoMode(enabled: boolean) {
+  if (enabled) localStorage.setItem(DEMO_MODE_KEY, 'true')
+  else localStorage.removeItem(DEMO_MODE_KEY)
+  emitDemoModeChange()
+}
 
 export function useReceipts() {
   const receipts = useLiveQuery(() =>
@@ -10,6 +33,10 @@ export function useReceipts() {
   )
 
   return receipts ?? []
+}
+
+export function useDemoMode() {
+  return useSyncExternalStore(subscribeDemoMode, getDemoModeSnapshot, () => false)
 }
 
 export function useSummary() {
@@ -108,15 +135,43 @@ async function addReceipts(receipts: Receipt[]): Promise<number> {
   return newReceipts.length
 }
 
+async function resetForRealImportIfNeeded() {
+  if (!getDemoModeSnapshot()) return
+
+  await db.receipts.clear()
+  await db.productCache.clear()
+  localStorage.removeItem('costco-year-filter')
+  setDemoMode(false)
+}
+
 export async function importReceiptsFromJson(jsonString: string): Promise<number> {
+  await resetForRealImportIfNeeded()
   const parsed = JSON.parse(jsonString)
   const receipts = parseReceiptsFromJson(parsed)
   return addReceipts(receipts)
 }
 
 export async function importReceiptsFromPdf(buffer: ArrayBuffer): Promise<number> {
+  await resetForRealImportIfNeeded()
   const receipts = await parseReceiptsFromPdf(buffer)
   return addReceipts(receipts)
+}
+
+export async function loadDemoReceipts(): Promise<number> {
+  const res = await fetch('/costco-receipts-demo.json', { cache: 'no-store' })
+  if (!res.ok) throw new Error('Could not load demo data')
+
+  const jsonString = await res.text()
+  const parsed = JSON.parse(jsonString)
+  const receipts = parseReceiptsFromJson(parsed)
+
+  await db.receipts.clear()
+  await db.productCache.clear()
+  await db.receipts.bulkAdd(receipts)
+  localStorage.removeItem('costco-year-filter')
+  setDemoMode(true)
+
+  return receipts.length
 }
 
 export async function deleteReceipt(id: string) {
@@ -144,4 +199,7 @@ export async function deleteReceiptItem(receiptId: string, itemId: string) {
 
 export async function clearAllData() {
   await db.receipts.clear()
+  await db.productCache.clear()
+  localStorage.removeItem('costco-year-filter')
+  setDemoMode(false)
 }
