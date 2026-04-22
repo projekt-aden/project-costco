@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-const siteUrl = (process.env.VITE_SITE_URL || 'http://localhost:4173').replace(/\/+$/, '')
+const siteUrl = (process.env.VITE_SITE_URL || 'https://projekt-aden.github.io/project-costco').replace(/\/+$/, '')
 const routes = ['/', '/analysis', '/gas', '/trends', '/top', '/scan']
 const outputDir = resolve(process.cwd(), 'public')
 
