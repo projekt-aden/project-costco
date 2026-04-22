@@ -1,5 +1,5 @@
 export const SITE_NAME = 'Costco Tracker'
-export const DEFAULT_SITE_URL = 'http://localhost:4173'
+export const DEFAULT_SITE_URL = 'https://projekt-aden.github.io/project-costco'
 export const DEFAULT_OG_IMAGE_PATH = '/og-image.svg'
 
 function getSiteUrlObject() {

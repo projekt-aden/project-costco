@@ -67,7 +67,13 @@ SEO metadata is route-based for public pages, and the production build pre-rende
 
 Private routes such as receipts and profile remain client-side and are marked `noindex`.
 
-Before building for production, set the public site URL so canonical tags, `robots.txt`, and `sitemap.xml` point at the right domain:
+By default, production SEO points to the live GitHub Pages host:
+
+```bash
+https://projekt-aden.github.io/project-costco
+```
+
+Override it only if you deploy this app to a different public domain:
 
 ```bash
 VITE_SITE_URL=https://your-domain.example npm run build
@@ -76,7 +82,7 @@ VITE_SITE_URL=https://your-domain.example npm run build
 For GitHub Pages repository deployments:
 
 ```bash
-VITE_BASE_PATH=/project-costco/ VITE_SITE_URL=https://projekt-aden.github.io/project-costco npm run build
+VITE_BASE_PATH=/project-costco/ npm run build
 ```
 
 The build also generates `dist/404.html` as a fallback for GitHub Pages route refreshes.
