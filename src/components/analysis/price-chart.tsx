@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { computeProductPriceSummary } from '../../lib/analytics'
 import type { PricePoint } from '../../types/product'
 
 function fmt(n: number): string {
@@ -22,9 +23,10 @@ export function PriceChart({ prices }: { prices: PricePoint[] }) {
 
   if (prices.length === 0) return null
 
-  const values = prices.map((p) => p.unitPrice)
-  const minPrice = Math.min(...values)
-  const maxPrice = Math.max(...values)
+  const summary = computeProductPriceSummary(prices)
+  if (!summary) return null
+  const minPrice = summary.minPrice
+  const maxPrice = summary.maxPrice
   const isStablePrice = minPrice === maxPrice
   const pricePad = isStablePrice ? minPrice * 0.15 || 1 : (maxPrice - minPrice) * 0.1 || 0.5
   const yMin = minPrice - pricePad
@@ -78,6 +80,9 @@ export function PriceChart({ prices }: { prices: PricePoint[] }) {
   const visibleMonths = monthLabels.filter((_, i) => i % xStep === 0)
 
   const hovered = hoveredIndex !== null ? points[hoveredIndex] : null
+  const averageY = PY + chartH - ((summary.averagePrice - yMin) / yRange) * chartH
+  const latestPoint = points[points.length - 1]
+  const bestPoint = points.find((point) => point.unitPrice === minPrice) || points[0]
 
   return (
     <div className="bg-surface rounded-xl border p-4">
@@ -111,6 +116,25 @@ export function PriceChart({ prices }: { prices: PricePoint[] }) {
             </g>
           )
         })}
+
+        <line
+          x1={PX}
+          y1={averageY}
+          x2={W - PR}
+          y2={averageY}
+          stroke="#10b981"
+          strokeWidth="1.5"
+          strokeDasharray="4,4"
+          opacity="0.8"
+        />
+        <text
+          x={W - PR}
+          y={averageY - 6}
+          textAnchor="end"
+          className="text-[10px] fill-[#10b981]"
+        >
+          Avg {fmt(summary.averagePrice)}
+        </text>
 
         {/* X month labels */}
         {visibleMonths.map((m, i) => (
@@ -151,6 +175,23 @@ export function PriceChart({ prices }: { prices: PricePoint[] }) {
             className="transition-all duration-100"
           />
         ))}
+
+        <circle
+          cx={bestPoint.x}
+          cy={bestPoint.y}
+          r="4"
+          fill="#ffffff"
+          stroke="#10b981"
+          strokeWidth="2"
+        />
+        <circle
+          cx={latestPoint.x}
+          cy={latestPoint.y}
+          r="4"
+          fill="#ffffff"
+          stroke="#1d4ed8"
+          strokeWidth="2"
+        />
 
         {/* Invisible hit areas for hover */}
         {points.map((p, i) => (
@@ -215,14 +256,22 @@ export function PriceChart({ prices }: { prices: PricePoint[] }) {
           Stable price: {fmt(minPrice)} across {prices.length} purchases
         </div>
       ) : (
-        <div className="flex justify-between mt-3 text-xs">
-          <span className="text-emerald-600 font-medium">Low: {fmt(minPrice)}</span>
-          <span className="text-text-2">
-            Avg: {fmt(values.reduce((s, v) => s + v, 0) / values.length)}
-          </span>
-          <span className="text-costco-red font-medium">High: {fmt(maxPrice)}</span>
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 mt-3 text-xs">
+          <SummaryChip label="Best Seen" value={fmt(summary.minPrice)} tone="text-emerald-600" />
+          <SummaryChip label="Latest" value={fmt(summary.latestPrice)} tone="text-blue-700" />
+          <SummaryChip label="Since First" value={summary.changePercent !== null ? `${summary.changePercent > 0 ? '+' : ''}${summary.changePercent}%` : '—'} tone={summary.changePercent !== null && summary.changePercent > 0 ? 'text-costco-red' : summary.changePercent !== null && summary.changePercent < 0 ? 'text-emerald-600' : 'text-text'} />
+          <SummaryChip label="Volatility" value={`${summary.volatilityPercent}%`} tone="text-violet-600" />
         </div>
       )}
+    </div>
+  )
+}
+
+function SummaryChip({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded-xl bg-surface-2 px-3 py-2">
+      <div className="text-[11px] text-text-3">{label}</div>
+      <div className={`text-sm font-semibold mt-0.5 ${tone}`}>{value}</div>
     </div>
   )
 }

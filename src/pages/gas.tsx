@@ -4,6 +4,7 @@ import { Fuel, TrendingDown, TrendingUp, DollarSign, Droplets } from 'lucide-rea
 import { useFilteredReceipts } from '../hooks/use-year-filter'
 import { YearPicker } from '../components/ui/year-picker'
 import { PriceChart } from '../components/analysis/price-chart'
+import { PageIntro, PageSection } from '../components/layout/page-shell'
 import type { Receipt } from '../types/receipt'
 
 function fmt(n: number): string {
@@ -75,10 +76,12 @@ export function GasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold">Gas</h2>
-        <YearPicker />
-      </div>
+      <PageIntro
+        eyebrow="Fuel"
+        title="Gas"
+        description="Track how much you spend on fuel, how your per-gallon price moves over time, and what each fill-up looked like."
+        actions={<YearPicker />}
+      />
 
       {fills.length === 0 ? (
         <div className="bg-surface rounded-xl border p-8 text-center text-text-3">
@@ -88,87 +91,104 @@ export function GasPage() {
         </div>
       ) : (
         <>
-          {/* Stats */}
           {stats && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard
-                icon={<DollarSign size={18} />}
-                label="Total Spent"
-                value={fmt(stats.totalSpent)}
-                color="text-costco-red"
-                bg="bg-red-50"
-              />
-              <StatCard
-                icon={<Droplets size={18} />}
-                label="Total Gallons"
-                value={fmtGal(stats.totalGallons)}
-                sub={`${stats.fillCount} fill-ups`}
-                color="text-costco-blue"
-                bg="bg-blue-50"
-              />
-              <StatCard
-                icon={<TrendingDown size={18} />}
-                label="Best Price"
-                value={fmtPpg(stats.minPpg) + '/gal'}
-                color="text-emerald-600"
-                bg="bg-emerald-50"
-              />
-              <StatCard
-                icon={<TrendingUp size={18} />}
-                label="Avg Price"
-                value={fmtPpg(stats.avgPpg) + '/gal'}
-                sub={`High: ${fmtPpg(stats.maxPpg)}`}
-                color="text-amber-600"
-                bg="bg-amber-50"
-              />
-            </div>
+            <PageSection
+              eyebrow="Snapshot"
+              title="How your fuel year is trending"
+              description="Use this layer for the fastest read on total fuel spend, total volume, and the best versus average price you saw."
+            >
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                  icon={<DollarSign size={18} />}
+                  label="Total Spent"
+                  value={fmt(stats.totalSpent)}
+                  color="text-costco-red"
+                  bg="bg-red-50"
+                />
+                <StatCard
+                  icon={<Droplets size={18} />}
+                  label="Total Gallons"
+                  value={fmtGal(stats.totalGallons)}
+                  sub={`${stats.fillCount} fill-ups`}
+                  color="text-costco-blue"
+                  bg="bg-blue-50"
+                />
+                <StatCard
+                  icon={<TrendingDown size={18} />}
+                  label="Best Price"
+                  value={fmtPpg(stats.minPpg) + '/gal'}
+                  color="text-emerald-600"
+                  bg="bg-emerald-50"
+                />
+                <StatCard
+                  icon={<TrendingUp size={18} />}
+                  label="Avg Price"
+                  value={fmtPpg(stats.avgPpg) + '/gal'}
+                  sub={`High: ${fmtPpg(stats.maxPpg)}`}
+                  color="text-amber-600"
+                  bg="bg-amber-50"
+                />
+              </div>
+            </PageSection>
           )}
 
-          {/* Price chart */}
-          {pricePoints.length > 1 && <PriceChart prices={pricePoints} />}
+          {pricePoints.length > 1 && (
+            <PageSection
+              eyebrow="Trend"
+              title="Price movement across fill-ups"
+              description="This chart shows how your per-gallon cost evolved through the year so you can spot lower windows and more expensive stretches."
+            >
+              <PriceChart prices={pricePoints} />
+            </PageSection>
+          )}
 
-          {/* Fill-up history */}
-          <div className="bg-surface rounded-xl border overflow-hidden">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold">Fill-up History ({fills.length})</h3>
-            </div>
-            <div className="divide-y">
-              {fills.map((f, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigate(`/receipts/${f.receiptId}`)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-surface-3 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 text-left">
-                    <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
-                      <Fuel size={18} />
+          <PageSection
+            eyebrow="History"
+            title="Fill-up history"
+            description="Open any fill-up to jump back to the original receipt and inspect the exact station visit."
+          >
+            <div className="bg-surface rounded-xl border overflow-hidden">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold">Fill-up History ({fills.length})</h3>
+              </div>
+              <div className="divide-y">
+                {fills.map((f, i) => (
+                  <button
+                    key={i}
+                    onClick={() => navigate(`/receipts/${f.receiptId}`)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-surface-3 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                        <Fuel size={18} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{f.grade}</p>
+                        <p className="text-xs text-text-3">
+                          {new Date(f.date + 'T00:00:00').toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </p>
+                        <p className="text-xs text-text-3">{f.warehouse || 'Costco'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{f.grade}</p>
-                      <p className="text-xs text-text-3">
-                        {new Date(f.date + 'T00:00:00').toLocaleDateString('en-US', {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
+                    <div className="text-right">
+                      <p className="text-sm font-bold tabular-nums">{fmt(f.total)}</p>
+                      <p className="text-xs text-emerald-600 font-medium tabular-nums">
+                        {fmtGal(f.gallons)} gal
                       </p>
-                      <p className="text-xs text-text-3">{f.warehouse || 'Costco'}</p>
+                      <p className="text-xs text-text-3 tabular-nums">
+                        {fmtPpg(f.pricePerGallon)}/gal
+                      </p>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold tabular-nums">{fmt(f.total)}</p>
-                    <p className="text-xs text-emerald-600 font-medium tabular-nums">
-                      {fmtGal(f.gallons)} gal
-                    </p>
-                    <p className="text-xs text-text-3 tabular-nums">
-                      {fmtPpg(f.pricePerGallon)}/gal
-                    </p>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          </PageSection>
         </>
       )}
     </div>

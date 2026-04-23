@@ -1,7 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ShoppingCart, Calendar, MapPin, DollarSign, TrendingUp, Hash } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Calendar, MapPin, DollarSign, TrendingUp, Hash, Repeat } from 'lucide-react'
+import { useFilteredReceipts } from '../hooks/use-year-filter'
 import { useProductAggregate } from '../hooks/use-products'
 import { PriceChart } from '../components/analysis/price-chart'
+import { buildProductHabitCollections } from '../lib/analytics'
+import { computeProductCompanions } from '../lib/baskets'
 import { matchCategory } from '../lib/product-categories'
 
 function fmt(n: number): string {
@@ -11,6 +14,7 @@ function fmt(n: number): string {
 export function ProductDetailPage() {
   const { itemNumber } = useParams<{ itemNumber: string }>()
   const navigate = useNavigate()
+  const receipts = useFilteredReceipts()
   const product = useProductAggregate(itemNumber || '')
   const cat = product ? matchCategory(product.description) : null
 
@@ -32,6 +36,13 @@ export function ProductDetailPage() {
     product.prices.length > 0
       ? product.prices.reduce((s, p) => s + p.unitPrice, 0) / product.prices.length
       : 0
+  const habitCollections = buildProductHabitCollections([product])
+  const habitInsight =
+    habitCollections.coreStaples[0] ||
+    habitCollections.emergingStaples[0] ||
+    habitCollections.coolingOff[0] ||
+    null
+  const companions = computeProductCompanions(receipts, product.itemNumber)
 
   return (
     <div className="space-y-6">
@@ -51,6 +62,14 @@ export function ProductDetailPage() {
         <div className="flex-1">
           <h2 className="text-xl font-bold">{product.description}</h2>
           <p className="text-sm text-text-3">#{product.itemNumber}{cat ? ` · ${cat.label}` : ''}</p>
+          {habitInsight && (
+            <p className="text-sm text-text-2 mt-2">
+              <span className="inline-flex rounded-full bg-surface-3 px-2.5 py-1 text-xs font-medium text-text">
+                {habitInsight.label}
+              </span>
+              <span className="ml-2 text-sm">{habitInsight.description}</span>
+            </p>
+          )}
         </div>
       </div>
 
@@ -89,6 +108,18 @@ export function ProductDetailPage() {
               })}
               color="text-amber-600"
               bg="bg-amber-50"
+            />
+            <Stat
+              icon={<Repeat size={16} />}
+              label="Typical Rebuy"
+              value={
+                product.averageDaysBetweenPurchases !== null
+                  ? `~${Math.round(product.averageDaysBetweenPurchases)} days`
+                  : '—'
+              }
+              sub={`${product.purchaseMonthsCount} active months`}
+              color="text-violet-600"
+              bg="bg-violet-50"
             />
           </div>
       </div>
@@ -141,6 +172,34 @@ export function ProductDetailPage() {
           ))}
         </div>
       </div>
+
+      {companions.length > 0 && (
+        <div className="bg-surface rounded-xl border overflow-hidden">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold">Often Bought Together</h3>
+          </div>
+          <div className="divide-y">
+            {companions.map((companion) => (
+              <button
+                key={companion.itemNumber}
+                onClick={() => navigate(`/analysis/${companion.itemNumber}`)}
+                className="w-full flex items-center justify-between p-4 hover:bg-surface-3 transition-colors cursor-pointer"
+              >
+                <div className="text-left min-w-0">
+                  <p className="text-sm font-medium truncate">{companion.description}</p>
+                  <p className="text-xs text-text-3 mt-0.5">
+                    #{companion.itemNumber} · {companion.pairCount} shared trips
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-semibold">{companion.togetherRate}%</p>
+                  <p className="text-xs text-text-3">of this item's trips</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -161,4 +220,3 @@ function Stat({ icon, label, value, sub, color, bg }: {
     </div>
   )
 }
-

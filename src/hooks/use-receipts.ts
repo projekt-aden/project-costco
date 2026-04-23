@@ -2,7 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useSyncExternalStore } from 'react'
 import { db } from '../db'
 import { parseReceiptsFromJson } from '../db/parse'
-import type { Receipt, YearGroup, MonthGroup, DayGroup } from '../types/receipt'
+import { computeSummaryMetrics, groupReceipts } from '../lib/analytics'
+import type { Receipt, YearGroup } from '../types/receipt'
 
 const DEMO_MODE_KEY = 'costco-demo-mode'
 const demoModeListeners = new Set<() => void>()
@@ -40,83 +41,12 @@ export function useDemoMode() {
 
 export function useSummary() {
   const receipts = useReceipts()
-
-  const totalSpent = receipts.reduce((sum, r) => sum + r.total, 0)
-  const totalTax = receipts.reduce((sum, r) => sum + r.tax, 0)
-  const totalSubtotal = receipts.reduce((sum, r) => sum + r.subtotal, 0)
-  const receiptCount = receipts.length
-
-  return {
-    totalSpent: Math.round(totalSpent * 100) / 100,
-    totalTax: Math.round(totalTax * 100) / 100,
-    totalSubtotal: Math.round(totalSubtotal * 100) / 100,
-    receiptCount,
-  }
+  return computeSummaryMetrics(receipts)
 }
 
 export function useGroupedReceipts(): YearGroup[] {
   const receipts = useReceipts()
   return groupReceipts(receipts)
-}
-
-function groupReceipts(receipts: Receipt[]): YearGroup[] {
-  const yearMap = new Map<number, Map<number, Receipt[]>>()
-
-  for (const r of receipts) {
-    const d = new Date(r.transactionDate)
-    const year = d.getFullYear()
-    const month = d.getMonth()
-
-    if (!yearMap.has(year)) yearMap.set(year, new Map())
-    const monthMap = yearMap.get(year)!
-    if (!monthMap.has(month)) monthMap.set(month, [])
-    monthMap.get(month)!.push(r)
-  }
-
-  const years: YearGroup[] = []
-
-  for (const [year, monthMap] of yearMap) {
-    const months: MonthGroup[] = []
-
-    for (const [month, monthReceipts] of monthMap) {
-      const dayMap = new Map<string, Receipt[]>()
-      for (const r of monthReceipts) {
-        if (!dayMap.has(r.transactionDate)) dayMap.set(r.transactionDate, [])
-        dayMap.get(r.transactionDate)!.push(r)
-      }
-
-      const days: DayGroup[] = Array.from(dayMap.entries())
-        .sort(([a], [b]) => b.localeCompare(a))
-        .map(([date, dayReceipts]) => ({
-          date,
-          total: dayReceipts.reduce((s, r) => s + r.total, 0),
-          tax: dayReceipts.reduce((s, r) => s + r.tax, 0),
-          receipts: dayReceipts,
-        }))
-
-      months.push({
-        month,
-        year,
-        total: monthReceipts.reduce((s, r) => s + r.total, 0),
-        tax: monthReceipts.reduce((s, r) => s + r.tax, 0),
-        receiptCount: monthReceipts.length,
-        days,
-      })
-    }
-
-    months.sort((a, b) => b.month - a.month)
-
-    years.push({
-      year,
-      total: months.reduce((s, m) => s + m.total, 0),
-      tax: months.reduce((s, m) => s + m.tax, 0),
-      receiptCount: months.reduce((s, m) => s + m.receiptCount, 0),
-      months,
-    })
-  }
-
-  years.sort((a, b) => b.year - a.year)
-  return years
 }
 
 async function addReceipts(receipts: Receipt[]): Promise<number> {

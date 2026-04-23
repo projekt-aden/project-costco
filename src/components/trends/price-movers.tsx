@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import type { PriceMover } from '../../hooks/use-trends'
+import type { PriceMover } from '../../lib/trends'
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })

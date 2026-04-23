@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { MonthlySpend } from '../../hooks/use-trends'
+import type { MonthlySpend } from '../../lib/trends'
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })

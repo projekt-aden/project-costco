@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
-import { DollarSign, Receipt, TrendingUp, Percent } from 'lucide-react'
+import { DollarSign, Receipt, TrendingUp, Percent, Package, CalendarDays } from 'lucide-react'
 import { useFilteredReceipts } from '../../hooks/use-year-filter'
+import { computeSummaryMetrics } from '../../lib/analytics'
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
@@ -8,27 +8,15 @@ function fmt(n: number): string {
 
 export function SummaryCards() {
   const receipts = useFilteredReceipts()
-
-  const { totalSpent, totalTax, totalSubtotal, receiptCount } = useMemo(() => {
-    const totalSpent = receipts.reduce((s, r) => s + r.total, 0)
-    const totalTax = receipts.reduce((s, r) => s + r.tax, 0)
-    const totalSubtotal = receipts.reduce((s, r) => s + r.subtotal, 0)
-    return {
-      totalSpent: Math.round(totalSpent * 100) / 100,
-      totalTax: Math.round(totalTax * 100) / 100,
-      totalSubtotal: Math.round(totalSubtotal * 100) / 100,
-      receiptCount: receipts.length,
-    }
-  }, [receipts])
-
-  const avgPerTrip = receiptCount > 0 ? totalSpent / receiptCount : 0
+  const { totalSpent, totalTax, totalSubtotal, receiptCount, averagePerTrip, uniqueItems, busiestMonth } =
+    computeSummaryMetrics(receipts)
   const taxRate = totalSubtotal > 0 ? (totalTax / totalSubtotal) * 100 : 0
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 xl:grid-cols-6 gap-4">
       <Card
         icon={<DollarSign size={20} />}
-        label="Total Spent"
+        label="Spend"
         value={fmt(totalSpent)}
         color="text-costco-red"
         bg="bg-red-50"
@@ -43,7 +31,7 @@ export function SummaryCards() {
       <Card
         icon={<TrendingUp size={20} />}
         label="Avg per Trip"
-        value={fmt(avgPerTrip)}
+        value={fmt(averagePerTrip)}
         color="text-emerald-600"
         bg="bg-emerald-50"
       />
@@ -54,6 +42,20 @@ export function SummaryCards() {
         sub={`${taxRate.toFixed(1)}% rate`}
         color="text-amber-600"
         bg="bg-amber-50"
+      />
+      <Card
+        icon={<Package size={20} />}
+        label="Unique Items"
+        value={uniqueItems.toLocaleString()}
+        color="text-violet-600"
+        bg="bg-violet-50"
+      />
+      <Card
+        icon={<CalendarDays size={20} />}
+        label="Busiest Month"
+        value={busiestMonth || '—'}
+        color="text-costco-blue"
+        bg="bg-sky-50"
       />
     </div>
   )

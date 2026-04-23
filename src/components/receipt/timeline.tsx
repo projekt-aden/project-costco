@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, ChevronRight, MapPin, Calendar } from 'lucide-react'
 import { useGroupedReceipts } from '../../hooks/use-receipts'
-import type { YearGroup, MonthGroup, DayGroup } from '../../types/receipt'
+import { groupReceipts } from '../../lib/analytics'
+import type { YearGroup, MonthGroup, DayGroup, Receipt } from '../../types/receipt'
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -13,8 +14,12 @@ function fmt(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
-export function Timeline() {
-  const groups = useGroupedReceipts()
+export function Timeline({ receipts }: { receipts?: Receipt[] }) {
+  const defaultGroups = useGroupedReceipts()
+  const groups = useMemo(
+    () => (receipts ? groupReceipts(receipts) : defaultGroups),
+    [defaultGroups, receipts],
+  )
 
   if (groups.length === 0) {
     return (

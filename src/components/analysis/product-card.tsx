@@ -1,16 +1,28 @@
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
 import { matchCategory } from '../../lib/product-categories'
+import { normalizeSearchText } from '../../lib/analytics'
 import type { ProductAggregate } from '../../types/product'
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
-export function ProductCard({ product }: { product: ProductAggregate }) {
+export function ProductCard({
+  product,
+  searchTerm = '',
+}: {
+  product: ProductAggregate
+  searchTerm?: string
+}) {
   const navigate = useNavigate()
   const cat = matchCategory(product.description)
   const Icon = cat.icon
+  const normalizedSearch = normalizeSearchText(searchTerm)
+  const highlightedDescription =
+    normalizedSearch && normalizeSearchText(product.description).includes(normalizedSearch)
+      ? highlight(product.description, searchTerm)
+      : product.description
 
   return (
     <button
@@ -24,9 +36,15 @@ export function ProductCard({ product }: { product: ProductAggregate }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium leading-tight line-clamp-2">
-              {product.description}
+              {highlightedDescription}
             </p>
             <p className="text-xs text-text-3 mt-0.5">#{product.itemNumber}</p>
+            <p className="text-xs text-text-3 mt-1">
+              {product.purchaseMonthsCount} active months
+              {product.averageDaysBetweenPurchases !== null
+                ? ` · ~${Math.round(product.averageDaysBetweenPurchases)} days between buys`
+                : ''}
+            </p>
           </div>
         </div>
 
@@ -39,5 +57,25 @@ export function ProductCard({ product }: { product: ProductAggregate }) {
         </div>
       </div>
     </button>
+  )
+}
+
+function highlight(text: string, query: string) {
+  const trimmed = query.trim()
+  if (!trimmed) return text
+
+  const index = text.toLowerCase().indexOf(trimmed.toLowerCase())
+  if (index < 0) return text
+
+  const before = text.slice(0, index)
+  const match = text.slice(index, index + trimmed.length)
+  const after = text.slice(index + trimmed.length)
+
+  return (
+    <>
+      {before}
+      <mark className="rounded bg-amber-100 px-0.5 text-inherit">{match}</mark>
+      {after}
+    </>
   )
 }

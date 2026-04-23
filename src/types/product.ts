@@ -17,7 +17,18 @@ export interface ProductAggregate {
   totalSpent: number
   prices: PricePoint[]
   purchases: PurchaseRecord[]
+  firstPurchased: string // ISO date
   lastPurchased: string // ISO date
+  averageDaysBetweenPurchases: number | null
+  purchaseMonthsCount: number
+  stapleScore: number
+  daysSinceLastPurchase: number
+}
+
+export interface ProductHabitInsight {
+  product: ProductAggregate
+  label: string
+  description: string
 }
 
 export interface PricePoint {
